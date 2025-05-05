@@ -1,0 +1,3 @@
+Dataset,|V|,|E|,AvgDeg,Strategy,EccCalls,PrunedNodes,TotalTime(s)
+smallworld.mtx,100000,999996,9.99996,2,20625,100000,90.678
+
