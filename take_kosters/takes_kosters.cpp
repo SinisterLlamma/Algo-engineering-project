@@ -23,8 +23,10 @@ Graph load_mm_graph(const string& path){
     string header; getline(in, header);
     if(header.rfind("%%MatrixMarket",0)!=0)
         throw runtime_error("Not a MatrixMarket file");
-    bool is_weighted = header.find("real")!=string::npos
-                    || header.find("integer")!=string::npos;
+    bool is_pattern  = header.find("pattern")!=string::npos;
+    bool is_weighted = !is_pattern
+                    && (header.find("real")   != string::npos
+                     || header.find("integer")!= string::npos);
     // skip comments
     string line;
     while(getline(in,line) && line.size() && line[0]=='%');
@@ -95,15 +97,15 @@ int selectFrom(const vector<bool>& inW,
     int best = -1;
     switch(strat){
       case BOUND_DIFF: {
-        // pick w∈W maximizing epsU[w] - epsL[w]
-        int mx = -1;
-        for(int w=0; w<G.n; w++) if(inW[w]){
-          int diff = epsU[w] - epsL[w];
-          if(diff > mx){
-            mx = diff; best = w;
-          }
-        }
-        break;
+         int64_t mx = -1;
+         for(int w = 0; w < G.n; w++) if(inW[w]){
+             int64_t diff = (int64_t)epsU[w] - (int64_t)epsL[w];
+             if(diff > mx){
+                 mx = diff;
+                 best = w;
+             }
+         }
+         break;
       }
       case INTERCHANGE: {
         static bool pickHigh = true;
