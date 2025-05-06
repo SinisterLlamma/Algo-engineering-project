@@ -91,14 +91,23 @@ def plot_iterations(df):
     plt.savefig('pruned_vs_iter.png')
 
 def main():
-    # Load the master CSVs
-    df_sum = pd.read_csv('master_summary.csv')
-    df_it  = pd.read_csv('master_iters.csv')
+    # Accept input directory as optional argument
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--input-dir', default='.', help='Directory containing the CSV files')
+    args = parser.parse_args()
 
+    # Load the master CSVs from the specified directory
+    import os
+    df_sum = pd.read_csv(os.path.join(args.input_dir, 'master_summary.csv'))
+    df_it  = pd.read_csv(os.path.join(args.input_dir, 'master_iters.csv'))
+
+    # Change to input directory for saving plots
+    os.chdir(args.input_dir)
     plot_summary(df_sum)
     plot_iterations(df_it)
 
-    print("All plots generated:")
+    print(f"All plots generated in {args.input_dir}:")
     print("  EccCalls.png, PrunedNodes.png, TotalTime(s).png")
     print("  W_vs_iter.png, bounds_vs_iter.png, gap_vs_iter.png, pruned_vs_iter.png")
 

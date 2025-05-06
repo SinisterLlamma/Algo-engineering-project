@@ -1,0 +1,4 @@
+Dataset,|V|,|E|,AvgDeg,Strategy,EccCalls,PrunedNodes,TotalTime(s),Memory(KB)
+../Dataset/fe_4elt2.mtx,11143,65636,5.89033,1,166,11143,0.0308631,3342336
+../Dataset/fe_4elt2.mtx,11143,65636,5.89033,2,143,11143,0.0268835,3325952
+../Dataset/fe_4elt2.mtx,11143,65636,5.89033,3,202,11143,0.0373864,3375104

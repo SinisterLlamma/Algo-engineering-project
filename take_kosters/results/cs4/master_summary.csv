@@ -1,0 +1,4 @@
+Dataset,|V|,|E|,AvgDeg,Strategy,EccCalls,PrunedNodes,TotalTime(s),Memory(KB)
+../Dataset/cs4.mtx,22499,87716,3.89866,1,158,22499,0.0660915,3899392
+../Dataset/cs4.mtx,22499,87716,3.89866,2,153,22499,0.0640142,4046848
+../Dataset/cs4.mtx,22499,87716,3.89866,3,349,22499,0.146084,3866624

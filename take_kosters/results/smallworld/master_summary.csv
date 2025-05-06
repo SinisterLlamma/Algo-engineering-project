@@ -1,0 +1,4 @@
+Dataset,|V|,|E|,AvgDeg,Strategy,EccCalls,PrunedNodes,TotalTime(s),Memory(KB)
+../Dataset/smallworld.mtx,100000,999996,9.99996,1,11431,100000,50.6331,33964032
+../Dataset/smallworld.mtx,100000,999996,9.99996,2,20625,100000,89.0964,35045376
+../Dataset/smallworld.mtx,100000,999996,9.99996,3,14146,100000,60.6028,33898496

@@ -1,0 +1,4 @@
+Dataset,|V|,|E|,AvgDeg,Strategy,EccCalls,PrunedNodes,TotalTime(s),Memory(KB)
+../Dataset/delaunay_n14.mtx,16384,98244,5.99634,1,573,16384,0.212656,4587520
+../Dataset/delaunay_n14.mtx,16384,98244,5.99634,2,523,16384,0.193436,4390912
+../Dataset/delaunay_n14.mtx,16384,98244,5.99634,3,628,16384,0.234802,4571136

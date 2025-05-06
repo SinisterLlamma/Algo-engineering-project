@@ -1,41 +1,66 @@
 # Algo-engineering-project
 
+## Installation
 
-## How to run takes_kosters.cpp
-``` bash
+```bash
+# Compile the C++ code
 g++ -O2 -std=c++17 takes_kosters.cpp -o bounding
-./bounding --strategy 2 smallworld.mtx > results.csv
+
+# Install Python dependencies
+pip install pandas matplotlib seaborn
 ```
 
-After running your C++ code, split its output into two files:
+## Running Single Experiments
 
-# assuming ./bounding printed both blocks to all_results.csv
-awk '/^#/ {exit} {print}' results.csv > summary.csv
-awk 'f;/^#/{f=1}' results.csv > iters.csv
-Install dependencies (if you don’t already have them):
-
-``` bash
-pip install pandas matplotlib
-```
-Run the plotting script:
-
-``` bash
-python plot_diameter_results.py --summary summary.csv --iters iters.csv
+To run a single experiment:
+```bash
+./bounding --strategy 2 path/to/graph.mtx > results.csv
 ```
 
-# generateing master CSV
+## Running Full Analysis
 
-Make sure your C++ binary is built and executable, e.g.:
+To run experiments for all strategies and generate plots:
 
-``` bash
-g++ -O2 -std=c++17 main.cpp -o bounding
+```bash
+# Run all strategies and generate master CSVs
+python generate_master_csv.py --binary ./bounding --graph path/to/graph.mtx
+
+# Generate plots for the results
+python plot_master_results.py --input-dir .
 ```
 
+## Running Batch Analysis
 
-```Bash
-chmod +x generate_master_csv.py
+To analyze multiple graphs and generate comparative results:
+
+```bash
+# Run experiments for all graphs in Dataset folder
+python run_all_experiments.py
+
+# Results will be organized in the results/ directory:
+# results/
+# ├── comparative_summary.csv      # Summary table comparing all datasets
+# ├── comparative_*.png           # Comparative plots
+# └── {graph_name}/              # Per-graph results
+#     ├── master_summary.csv
+#     ├── master_iters.csv
+#     └── *.png                  # Individual plots
 ```
-Run it:
-``` bash
-python generate_master_csv.py --binary ./bounding --graph smallworld.mtx
-```
+
+## Output Files
+
+- `master_summary.csv`: Summary statistics for each strategy
+- `master_iters.csv`: Iteration-level data for each strategy
+- Various `.png` files showing different metrics and comparisons
+
+## Generated Plots
+
+1. `EccCalls.png` - Number of eccentricity calls by strategy
+2. `PrunedNodes.png` - Total pruned nodes by strategy
+3. `TotalTime(s).png` - Total time (s) by strategy
+4. `W_vs_iter.png` - Candidate-set size vs iteration
+5. `bounds_vs_iter.png` - ΔL & ΔU vs iteration
+6. `gap_vs_iter.png` - ΔU – ΔL vs iteration
+7. `pruned_vs_iter.png` - Cumulative pruned nodes vs iteration
+
+For batch analysis, additional comparative plots are generated showing trends across all datasets.
