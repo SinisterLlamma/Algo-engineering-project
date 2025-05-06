@@ -169,13 +169,16 @@ Empirically on real-world small-world datasets, **INTERCHANGE** gave the fastest
 
 The algorithm was tested on various real-world and synthetic networks:
 
-| Dataset | |V| | |E| | Avg. Degree | Description |
-|---------|------|------|-------------|-------------|
-| smallworld | 100,000 | 999,996 | 10.0 | Synthetic small-world network |
-| delaunay_n15 | 32,768 | 196,548 | 6.0 | Delaunay triangulation |
-| delaunay_n14 | 16,384 | 98,244 | 6.0 | Delaunay triangulation |
-| cs4 | 22,499 | 87,716 | 3.9 | Computer science network |
-| fe_4elt2 | 11,143 | 65,636 | 5.89 | Finite element mesh |
+
+| Dataset | V | E | Description |
+|---------|-------|-------------|-------------|
+| smallworld | 100,000 | 999,996 | Synthetic small-world network |
+| delaunay_n15 | 32,768 | 196,548 | Delaunay triangulation |
+| delaunay_n14 | 16,384 | 98,244 | Delaunay triangulation |
+| cs4 | 22,499 | 87,716 | Computer science network |
+| fe_4elt2 | 11,143 | 65,636 | Finite element mesh |
+
+
 
 ### 6.2 Performance Analysis
 
@@ -196,7 +199,7 @@ Our experimental results show significant variation in the number of eccentricit
   - fe_4elt2: 143-202 calls
 
 #### 6.2.2 Time Performance
-![Total Time Performance](take_kosters/results/comparative_TotalTime.png)
+![Total Time Performance](take_kosters/results/comparative_TotalTime(s).png)
 
 Runtime analysis reveals interesting patterns:
 
@@ -211,7 +214,7 @@ Runtime analysis reveals interesting patterns:
   - fe_4elt2: 0.03-0.04s
 
 #### 6.2.3 Memory Usage
-![Peak Memory Usage](take_kosters/results/comparative_Memory.png)
+![Peak Memory Usage](take_kosters/results/comparative_Memory(KB).png)
 
 Peak memory consumption shows scaling with graph size:
 
@@ -521,6 +524,113 @@ iFUB combines simple BFS routines with a clever fringe-based bound-refinement to
 
 > **Takeaway:** Highest-degree root (Strat 1) is most efficient here; blind 4-sweep random (Strat 2) can misfire, costing extra passes.  
 > _Note: Strat 0 and Strat 2 can vary if the random seed is changed._
+
+---
+
+## Comparative Analysis: BoundingDiameters vs. iFUB
+
+This section provides a comparative analysis of the BoundingDiameters algorithm (referred to as BD) and the iFUB algorithm based on their experimental results on a common set of graph datasets. The comparison focuses on the number of core computations (eccentricity/BFS calls), overall runtime, and peak memory usage. For BoundingDiameters, results generally refer to its best or representative strategies (S1: BOUND_DIFF, S2: INTERCHANGE). For iFUB, results refer to its best performing strategies (often Strat 2: 4-Sweep-rand for `smallworld`, Strat 1: highest-degree, or ranges).
+
+### 1. BFS/Eccentricity Calls
+
+Both algorithms rely on graph traversals (BFS for unweighted graphs, Dijkstra for weighted in BD) to compute eccentricities. The number of such calls is a key indicator of computational work.
+
+*   **`smallworld.mtx` (100k V, 1M E):**
+    *   **BD:** 11,431 (S1) to 20,625 (S2) calls.
+    *   **iFUB:** 39 (Strat 2) to 737 calls.
+    *   *iFUB is vastly superior, requiring significantly fewer calls.*
+*   **`delaunay_n15.mtx` (32k V, 196k E):**
+    *   **BD:** 631-988 calls.
+    *   **iFUB:** 2 (best strategies) to 8 calls.
+    *   *iFUB is vastly superior.*
+*   **`delaunay_n14.mtx` (16k V, 98k E):**
+    *   **BD:** 523-628 calls.
+    *   **iFUB:** 2 (best strategies) to 9 calls.
+    *   *iFUB is vastly superior.*
+*   **`cs4.mtx` (22k V, 87k E):**
+    *   **BD:** 153-349 calls.
+    *   **iFUB:** 3 (Strat 1) to 11 calls.
+    *   *iFUB is vastly superior.*
+*   **`fe_4elt2.mtx` (11k V, 65k E):**
+    *   **BD:** 143-202 calls.
+    *   **iFUB:** 2 calls for all strategies.
+    *   *iFUB is vastly superior.*
+
+**Summary (BFS/Eccentricity Calls):** iFUB consistently outperforms BoundingDiameters by a significant margin, often requiring orders of magnitude fewer BFS/eccentricity computations across all tested datasets. This suggests iFUB's strategy for selecting nodes and updating bounds is much more efficient at converging to the exact diameter.
+
+### 2. Time Performance
+
+Execution time reflects the practical efficiency of the algorithms.
+
+*   **`smallworld.mtx`:**
+    *   **BD:** 50.63s (S1) to 89.10s (S2).
+    *   **iFUB:** 0.0998s (Strat 2) to ~1.8s.
+    *   *iFUB is dramatically faster.*
+*   **`delaunay_n15.mtx`:**
+    *   **BD:** 0.46s to 0.72s.
+    *   **iFUB:** ~0.0019s to ~0.0068s.
+    *   *iFUB is significantly faster.*
+*   **`delaunay_n14.mtx`:**
+    *   **BD:** 0.19s to 0.23s.
+    *   **iFUB:** ~0.0010s to ~0.0039s.
+    *   *iFUB is significantly faster.*
+*   **`cs4.mtx`:**
+    *   **BD:** 0.06s to 0.15s.
+    *   **iFUB:** ~0.0018s to ~0.0055s.
+    *   *iFUB is significantly faster.*
+*   **`fe_4elt2.mtx`:**
+    *   **BD:** 0.03s to 0.04s.
+    *   **iFUB:** < 0.00065s.
+    *   *iFUB is significantly faster.*
+
+**Summary (Time Performance):** Consistent with the fewer BFS calls, iFUB demonstrates substantially better time performance across all datasets. The differences are particularly stark on the larger `smallworld` graph, where iFUB is orders of magnitude faster.
+
+### 3. Memory Usage
+
+Peak memory usage (RSS) indicates the memory footprint of each algorithm. (Assuming iFUB's "KB" values with spaces are byte counts, converted to MB for comparison).
+
+*   **`smallworld.mtx`:**
+    *   **BD:** ~34-35 MB.
+    *   **iFUB:** ~42.5 MB (Strat 2) to ~45.3 MB.
+    *   *BoundingDiameters is slightly more memory efficient.*
+*   **`delaunay_n15.mtx`:**
+    *   **BD:** ~7.4-7.5 MB.
+    *   **iFUB:** ~16.5 MB.
+    *   *BoundingDiameters is significantly more memory efficient (uses less than half).*
+*   **`delaunay_n14.mtx`:**
+    *   **BD:** ~4.3-4.5 MB.
+    *   **iFUB:** ~13.3 MB.
+    *   *BoundingDiameters is significantly more memory efficient (uses about one-third).*
+*   **`cs4.mtx`:**
+    *   **BD:** ~3.8-4.0 MB.
+    *   **iFUB:** ~13.0 - 13.1 MB.
+    *   *BoundingDiameters is significantly more memory efficient (uses about one-third).*
+*   **`fe_4elt2.mtx`:**
+    *   **BD:** ~3.3-3.4 MB.
+    *   **iFUB:** ~12.2 MB.
+    *   *BoundingDiameters is significantly more memory efficient (uses about one-fourth).*
+
+**Summary (Memory Usage):** BoundingDiameters consistently exhibits lower peak memory usage compared to iFUB. For smaller graphs, iFUB's memory footprint can be 2-4 times larger. On the largest graph (`smallworld`), the difference is less pronounced but still favors BoundingDiameters. This suggests that iFUB might maintain more extensive data structures (e.g., for fringe sets) during its execution.
+
+### 4. Overall Conclusion
+
+The comparison reveals a clear trade-off between computational efficiency and memory usage:
+
+*   **iFUB Algorithm:**
+    *   **Pros:** Exceptionally fast in terms of execution time and requires drastically fewer BFS/eccentricity computations. Its strategies, particularly 4-Sweep, are highly effective in quickly identifying critical nodes.
+    *   **Cons:** Higher memory consumption compared to BoundingDiameters. The presented iFUB is primarily for unweighted graphs.
+
+*   **BoundingDiameters Algorithm:**
+    *   **Pros:** More memory-efficient across all datasets. It also has explicit support for weighted graphs (using Dijkstra), making it more versatile.
+    *   **Cons:** Significantly slower and performs a much larger number of eccentricity computations.
+
+**Which algorithm performs better?**
+
+*   For **speed and minimizing computational load (CPU time, I/O for graph traversals)**, **iFUB is unequivocally the superior algorithm** for unweighted graphs. Its ability to converge with a minimal number of BFS calls makes it highly suitable for large networks where these computations are expensive.
+*   If **memory is an extremely critical constraint**, BoundingDiameters offers a more frugal alternative, albeit at a substantial cost in performance.
+*   If the graph is **weighted**, BoundingDiameters provides a direct solution, whereas the iFUB version discussed is for unweighted graphs.
+
+In typical scenarios involving large unweighted networks where performance is key, **iFUB would be the preferred choice** due to its remarkable speed advantage. However, the lower memory footprint and weighted graph capability of BoundingDiameters could be decisive in specific contexts.
 
 
 
