@@ -392,4 +392,138 @@ These pathological cases rely on highly regular structures **not** found in most
 iFUB combines simple BFS routines with a clever fringe-based bound-refinement to compute exact diameters. With appropriate root-selection (notably 4-Sweep variants), it performs only a handful of BFSes in practice, achieving near-linear $O(m)$ behavior on complex networks.
 
 ---
+## 6 Experimental Results
+
+### Runtime by Strategy
+
+![Time Performance Comparison](Crescenzi/iFUB_Runtime.png)
+
+
+| Matrix               | Strat 0 | Strat 1 | Strat 2 | Strat 3 |
+|----------------------|--------:|--------:|--------:|--------:|
+| **smallworld.mtx**   | 1.4506 s | 1.8449 s | 0.0998 s | 1.4083 s |
+| **fe_4elt2.mtx**     | 0.000641 s | 0.000633 s | 0.000619 s | 0.000613 s |
+| **delaunay_n14.mtx** | 0.003888 s | 0.001116 s | 0.001020 s | 0.001022 s |
+| **delaunay_n15.mtx** | 0.001929 s | 0.002089 s | 0.006806 s | 0.002039 s |
+| **cs4.mtx**          | 0.005547 s | 0.001835 s | 0.004087 s | 0.003105 s |
+
+### BFS Calls by Strategy
+
+![BFS Calls Comparison](Crescenzi/iFUB_BFS_Calls.png)
+
+
+| Matrix               | Strat 0 | Strat 1 | Strat 2 | Strat 3 |
+|----------------------|--------:|--------:|--------:|--------:|
+| **smallworld.mtx**   | 587     | 737     | 39      | 573     |
+| **fe_4elt2.mtx**     | 2       | 2       | 2       | 2       |
+| **delaunay_n14.mtx** | 9       | 2       | 2       | 2       |
+| **delaunay_n15.mtx** | 2       | 2       | 8       | 2       |
+| **cs4.mtx**          | 11      | 3       | 8       | 6       |
+
+### Peak Memory (RSS) by Strategy
+
+![Memory Usage Comparison](Crescenzi/iFUB_Peak_Memory.png)
+
+
+| Matrix               | Strat 0    | Strat 1    | Strat 2    | Strat 3    |
+|----------------------|-----------:|-----------:|-----------:|-----------:|
+| **smallworld.mtx**   | 45 318 144 KB | 44 810 240 KB | 42 516 480 KB | 44 810 240 KB |
+| **fe_4elt2.mtx**     | 12 206 080 KB | 12 206 080 KB | 12 222 464 KB | 12 206 080 KB |
+| **delaunay_n14.mtx** | 13 336 576 KB | 13 320 192 KB | 13 320 192 KB | 13 320 192 KB |
+| **delaunay_n15.mtx** | 16 580 608 KB | 16 580 608 KB | 16 580 608 KB | 16 580 608 KB |
+| **cs4.mtx**          | 13 156 352 KB | 13 041 664 KB | 13 058 048 KB | 13 058 048 KB |
+
+### Analysis
+
+#### 1. `smallworld.mtx`
+**Runtime**  
+- **Strategy 2 (4-sweep random):** 0.10 s (≈10× faster than the rest)  
+- **Strategies 0 & 3:** ~1.40–1.45 s  
+- **Strategy 1 (highest-degree):** ~1.84 s  
+
+**BFS Calls**  
+- **Strat 2:** 39  
+- **Strats 0, 1, 3:** 570–740  
+
+**Memory (Peak RSS)**  
+- **Strat 2:** ~42.5 M KB  
+- **Strats 0 & 3:** ~44.8 M KB  
+- **Strat 1:** ~44.8 M KB  
+
+> **Takeaway:** On small-world graphs, **4-sweep random** dominates in speed, BFS count, and memory.  
+> _Note: Strat 0 and Strat 2 measurements can vary drastically if the `srand` seed changes._
+
+---
+
+#### 2. `fe_4elt2.mtx` (Finite-element mesh)
+**Runtime**  
+- All strategies finish in < 0.00065 s  
+
+**BFS Calls**  
+- 2 (initial tree + one refinement)  
+
+**Memory**  
+- ~12.2 M KB  
+
+> **Takeaway:** Very low-diameter, well-connected mesh—any root converges immediately.
+
+---
+
+#### 3. `delaunay_n14.mtx` (Planar Delaunay graph)
+**Runtime**  
+- **Strat 1 (highest-degree):** ~0.00112 s (fastest)  
+- **Strats 2 & 3:** ~0.00102 s  
+- **Strat 0:** ~0.00389 s  
+
+**BFS Calls**  
+- **Strat 0:** 9  
+- **Strats 1, 2, 3:** 2  
+
+**Memory**  
+- ~13.32 M KB  
+
+> **Takeaway:** Highest-degree root (Strat 1) is best; random roots can land in “long arms,” costing extra BFS.
+
+---
+
+#### 4. `delaunay_n15.mtx` (Larger Delaunay graph)
+**Runtime**  
+- **Strat 0:** ~0.00193 s  
+- **Strats 1 & 3:** ~0.002 s  
+- **Strat 2:** ~0.00681 s  
+
+**BFS Calls**  
+- **Strat 2:** 8  
+- **Strats 0, 1, 3:** 2  
+
+**Memory**  
+- ~16.58 M KB  
+
+> **Takeaway:** On this larger graph, 4-sweep random (Strat 2) may pick a less-central root and pay for it. Simpler roots suffice.
+
+---
+
+#### 5. `cs4.mtx` (Circuit-simulation graph)
+**Runtime**  
+- **Strat 1:** ~0.00184 s (fastest)  
+- **Strat 3:** ~0.00311 s  
+- **Strat 2:** ~0.00409 s  
+- **Strat 0:** ~0.00555 s  
+
+**BFS Calls**  
+- **Strat 1:** 3  
+- **Strat 3:** 6  
+- **Strat 2:** 8  
+- **Strat 0:** 11  
+
+**Memory**  
+- ~13.04–13.15 M KB  
+
+> **Takeaway:** Highest-degree root (Strat 1) is most efficient here; blind 4-sweep random (Strat 2) can misfire, costing extra passes.  
+> _Note: Strat 0 and Strat 2 can vary if the random seed is changed._
+
+
+
+
+
 
