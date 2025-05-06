@@ -1,5 +1,6 @@
 // main.cpp
 #include <bits/stdc++.h>
+#include <sys/resource.h>
 using namespace std;
 using Clock = chrono::high_resolution_clock;
 
@@ -231,10 +232,14 @@ int main(int argc, char* argv[]){
 
     // Table 1 header
     cout<<"Dataset,|V|,|E|,AvgDeg,Strategy,"
-          "EccCalls,PrunedNodes,TotalTime(s)\n";
+          "EccCalls,PrunedNodes,TotalTime(s),Memory(KB)\n";
 
     // run the algorithm
     RunStats R = boundingDiametersInstr(G, strat);
+    // get peak memory usage (in KB)
+    struct rusage usage;
+    getrusage(RUSAGE_SELF, & usage);
+    long memKB = usage.ru_maxrss;
 
     // Table 1 row
     cout<<argv[3]<<","
@@ -244,7 +249,8 @@ int main(int argc, char* argv[]){
         <<int(strat)<<","
         <<R.totalEcc<<","
         <<R.totalPruned<<","
-        <<R.totalTime<<"\n\n";
+        <<R.totalTime<<","
+        <<memKB<<"\n\n";
 
     // Figure 2 header + data
     cout<<"# iter,|W|,DeltaL,DeltaU\n";

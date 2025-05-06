@@ -23,7 +23,8 @@ def plot_summary(df):
     metrics = {
         'EccCalls': 'Number of Eccentricity Calls',
         'PrunedNodes': 'Total Pruned Nodes',
-        'TotalTime(s)': 'Total Time (s)'
+        'TotalTime(s)': 'Total Time (s)',
+        'Memory(KB)': 'Peak Memory (KB)'
     }
     for col, title in metrics.items():
         plt.figure()

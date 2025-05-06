@@ -46,7 +46,7 @@ def parse_summary(block1):
     except Exception:
         # headerless: assign the eight known columns
         cols = ["Dataset","|V|","|E|","AvgDeg",
-                "Strategy","EccCalls","PrunedNodes","TotalTime(s)"]
+                "Strategy","EccCalls","PrunedNodes","TotalTime(s)","Memory(KB)"]
         df = pd.read_csv(io.StringIO(block1), header=None, names=cols)
     return df
 
