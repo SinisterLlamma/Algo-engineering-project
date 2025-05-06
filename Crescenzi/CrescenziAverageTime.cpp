@@ -151,7 +151,6 @@ int main(int argc, char* argv[]){
     int strategy = stoi(argv[1]);
     string folder = argv[2];
     srand(time(0));
-    srand(42);
     double totalTime = 0.0;
     int fileCount = 0;
 
